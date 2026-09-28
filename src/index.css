@@ -1,0 +1,108 @@
+/*
+ * index.css — Global styles and custom CSS animation keyframes.
+ *
+ * Tailwind directives load the utility classes.
+ * Custom @keyframes below drive the train slide-out animation, which requires
+ * CSS custom properties (--slide-x, --slide-y) set inline by TrainTile.tsx.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base resets ──────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Train: CRASH animation (blocked tap, lives > 1) ──────────────────────────
+ * Train lunges into the blocking train, crunches slightly, then slides back home.
+ * --crash-x / --crash-y are set inline by TrainTile (pixel distance to blocker).  */
+
+@keyframes trainCrash {
+  0%   { transform: translate(0px, 0px); }
+  22%  { transform: translate(var(--crash-x), var(--crash-y)); }          /* impact */
+  32%  { transform: translate(
+           calc(var(--crash-x) * 1.07),
+           calc(var(--crash-y) * 1.07)
+         ); }                                                               /* crunch */
+  55%  { transform: translate(
+           calc(var(--crash-x) * 0.25),
+           calc(var(--crash-y) * 0.25)
+         ); }                                                               /* bounce back */
+  100% { transform: translate(0px, 0px); }                                 /* home */
+}
+
+.train-crash {
+  animation: trainCrash 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  pointer-events: none;
+}
+
+/* ─── Train: CRASH-STAY animation (last life — stays crashed at blocker) ───────
+ * Train lunges into blocker and stays there. animation-fill-mode:forwards holds it. */
+
+@keyframes trainCrashStay {
+  0%   { transform: translate(0px, 0px); }
+  60%  { transform: translate(
+           calc(var(--crash-x) * 1.06),
+           calc(var(--crash-y) * 1.06)
+         ); }                                                               /* slight crunch */
+  100% { transform: translate(var(--crash-x), var(--crash-y)); }          /* stay crashed */
+}
+
+.train-crash-stay {
+  animation: trainCrashStay 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+/* ─── Train: Slide-out animation (valid tap) ──────────────────────────────── */
+/*
+ * The slide translation targets are provided as CSS custom properties
+ * --slide-x and --slide-y, set inline on the TrainTile wrapper by
+ * TrainTile.tsx using the pixel distance calculated by calculateExitDistance().
+ *
+ * Using var() here makes the single keyframe reusable for all 4 directions.
+ */
+
+@keyframes trainSlide {
+  0%   {
+    transform: translate(0px, 0px);
+    opacity: 1;
+  }
+  80%  {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--slide-x, 0px), var(--slide-y, 0px));
+    opacity: 0;
+  }
+}
+
+.train-slide {
+  animation: trainSlide 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+  pointer-events: none; /* Prevent further taps during slide */
+}
+
+/* ─── Win modal: fade + scale entrance ─────────────────────────────────────── */
+
+@keyframes fadeScaleIn {
+  0%   { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
